@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment variables (keep .env.example)
+.env
+.env.local
+.env.production
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Build
+dist/
+build/
+
+# Temporary
+tmp/
+temp/
+
+# Test
+coverage/
+
+# Commit hash files
+*-commit-hash.txt
+
+# Test files
+test-*.js
+fix-*.js
+*.test.js
+*.spec.js
