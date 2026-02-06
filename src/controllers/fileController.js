@@ -156,6 +156,7 @@ const uploadFile = async (req, res, next) => {
 const downloadFile = async (req, res, next) => {
   try {
     const { fileId } = req.params;
+    const { download } = req.query; // Check if download=true query param exists
 
     const file = await File.findOne({
       _id: fileId,
@@ -167,13 +168,12 @@ const downloadFile = async (req, res, next) => {
       return res.status(404).json({ error: 'File not found' });
     }
 
-    // Get signed URL for S3 object
-    const downloadUrl = await getS3ObjectUrl(file.s3Key, 3600);
+    // Get signed URL - force download only if download=true
+    const forceDownload = download === 'true';
+    const downloadUrl = await getS3ObjectUrl(file.s3Key, 3600, forceDownload);
 
-    console.log('⬇️ Download request for file:', file.fileName);
-    console.log('📥 S3 Signed URL generated');
+    console.log(`${forceDownload ? '⬇️ Download' : '👁️ View'} request for file:`, file.fileName);
 
-    // Return the file with proper download headers
     res.json({
       downloadUrl,
       fileName: file.fileName,
@@ -297,6 +297,41 @@ const emptyTrash = async (req, res, next) => {
     res.json({ 
       message: 'Trash emptied successfully',
       deletedCount: result.deletedCount
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const renameFile = async (req, res, next) => {
+  try {
+    const { fileId } = req.params;
+    const { newName } = req.body;
+
+    if (!newName || !newName.trim()) {
+      return res.status(400).json({ error: 'New name is required' });
+    }
+
+    const file = await File.findOne({
+      _id: fileId,
+      userId: req.userId,
+      isDeleted: false
+    });
+
+    if (!file) {
+      return res.status(404).json({ error: 'File not found' });
+    }
+
+    file.fileName = newName.trim();
+    file.lastModified = new Date();
+    await file.save();
+
+    res.json({ 
+      message: 'File renamed successfully',
+      file: {
+        id: file._id,
+        fileName: file.fileName
+      }
     });
   } catch (error) {
     next(error);
@@ -453,5 +488,6 @@ module.exports = {
   downloadFolder,
   restoreFile,
   toggleStar,
-  emptyTrash
+  emptyTrash,
+  renameFile
 };

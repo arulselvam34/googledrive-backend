@@ -11,7 +11,8 @@ const {
   downloadFolder,
   restoreFile,
   toggleStar,
-  emptyTrash
+  emptyTrash,
+  renameFile
 } = require('../controllers/fileController');
 
 // Multer configuration for in-memory storage
@@ -49,6 +50,7 @@ router.get('/:folderId/download-folder', downloadFolder);
 router.delete('/:fileId', deleteFile);
 router.patch('/:fileId/restore', restoreFile);
 router.patch('/:fileId/star', toggleStar);
+router.patch('/:fileId/rename', renameFile);
 router.delete('/trash/empty', emptyTrash);
 
 module.exports = router;
